@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- 修正 v11: タイトルを修正 -->
-    <title>音感トレーニング (v11 音量調整)</title>
+    <!-- 修正 v12: タイトルを修正 -->
+    <title>音感トレーニング (v12 説明追加)</title>
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
@@ -325,6 +325,72 @@
             color: #888;
         }
 
+        /* v12 追加: 説明セクションのスタイル */
+        .explanation-container {
+            width: 100%;
+            max-width: 540px; /* メインコンテナと幅を合わせる */
+            margin-top: 20px;
+            box-sizing: border-box;
+        }
+        .explanation-container details {
+            background: #ffffff;
+            border-radius: 10px;
+            border: 1px solid #eee;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            overflow: hidden; /* 角丸を維持するため */
+        }
+        .explanation-container summary {
+            padding: 14px 20px;
+            font-weight: 600;
+            color: #444;
+            cursor: pointer;
+            list-style: none; /* デフォルトの三角を消す */
+            transition: background-color 0.2s;
+            position: relative; /* v12 修正: 矢印配置のため */
+        }
+        /* v12 修正: デフォルトのマーカーを消す (webkit) */
+        .explanation-container summary::-webkit-details-marker {
+            display: none;
+        }
+        /* v12 修正: カスタム矢印を追加 */
+        .explanation-container summary::before {
+            content: '▼';
+            position: absolute;
+            left: 20px;
+            top: 14px;
+            font-size: 0.8em;
+            color: #666;
+            transition: transform 0.2s ease;
+        }
+        .explanation-container details[open] summary::before {
+            transform: rotate(-180deg);
+        }
+        .explanation-container details[open] summary {
+            /* 開いているときはsummaryの角丸を調整（任意） */
+            border-bottom-left-radius: 0;
+            border-bottom-right-radius: 0;
+        }
+        
+        /* v12 修正: 矢印の分、テキストをインデント */
+        .explanation-container summary {
+            padding-left: 45px; 
+        }
+
+        .explanation-content {
+            padding: 0 20px 20px 20px;
+            font-size: 0.95rem;
+            line-height: 1.7;
+            color: #555;
+            border-top: 1px solid #eee;
+        }
+        .explanation-content p {
+            margin: 0;
+            padding-top: 15px;
+        }
+        .explanation-content p:first-child {
+            margin-top: 0;
+        }
+
     </style>
 </head>
 <body>
@@ -357,6 +423,29 @@
         <div id="answer">（ボタンを押してください）</div>
 
     </div> <!-- .container 閉じタグ -->
+
+    <!-- v12 追加: 説明セクション -->
+    <div class="explanation-container">
+        <details>
+            <summary>初級モードと中級モードの違い</summary>
+            <div class="explanation-content">
+                <p>
+                    <strong>初級モード:</strong><br>
+                    問題のメロディの<strong>1音目</strong>は、必ずそのキー（調）の<strong>ルート音（根音）</strong>から始まります。
+                    (例: キーがCなら、必ず「ド」の音から始まります)
+                </p>
+                <p>
+                    <strong>中級モード:</strong><br>
+                    問題のメロディの<strong>1音目</strong>は、そのキーの<strong>コードトーン</strong>（ルート音、第3音、第5音など）の中からランダムで選ばれます。
+                    (例: キーがCメジャーなら、「ド」「ミ」「ソ」のいずれかから始まります)
+                </p>
+                <p>
+                    1音目がルート音以外から始まるため、中級モードの方が難易度が高くなります。
+                </p>
+            </div>
+        </details>
+    </div>
+
 
     <script>
         // --- 1. Web Audio APIの準備 ---
@@ -743,7 +832,10 @@
             ];
 
             const keyRootSemitone = currentKeyInfo.rootMidi % 12; 
+            
+            // v15 修正: 'keyRootRoutine' -> 'keyRootSemitone' のタイポを修正
             const scaleSemitones = scaleIntervals.map(i => (keyRootSemitone + i) % 12);
+            // v15 修正: 'keyRootRoutine' -> 'keyRootSemitone' のタイポを修正
             const chordSemitones = chordIntervals.map(i => (keyRootSemitone + i) % 12);
 
             for (const key of keyTemplate) {
