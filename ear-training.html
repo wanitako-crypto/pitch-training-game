@@ -1,0 +1,949 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- 修正 v12: タイトルを修正 -->
+    <title>音感トレーニング (v12 説明追加)</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            display: grid;
+            place-items: center;
+            min-height: 100vh;
+            background-color: #f0f2f5;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 540px; 
+            background: #ffffff;
+            padding: 24px;
+            border-radius: 16px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+            box-sizing: border-box;
+        }
+        
+        /* コントロールグループ (v11 共通化) */
+        .control-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+        .control-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+        }
+        .control-group select {
+            width: 100%;
+            padding: 12px;
+            font-size: 1rem;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            background-color: #fdfdfd;
+            cursor: pointer;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23555' viewBox='0 0 16 16'%3E%3Cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            background-size: 16px;
+        }
+        .control-group select:disabled {
+            background-color: #eee;
+            color: #aaa;
+        }
+        /* v11 追加: 音量スライダーのスタイル */
+        .control-group input[type="range"] {
+            width: 100%;
+            cursor: pointer;
+            margin-top: 4px;
+        }
+
+        /* モード別ボタン */
+        .mode-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+        .mode-buttons button {
+            padding: 14px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            border-radius: 10px;
+            color: white;
+            transition: background-color 0.2s, transform 0.1s;
+        }
+        .mode-buttons button:nth-child(1) {
+            background-color: #007bff; /* 初級 */
+        }
+        .mode-buttons button:nth-child(2) {
+            background-color: #dc3545; /* 中級 */
+        }
+        .mode-buttons button:hover {
+            opacity: 0.85;
+        }
+        .mode-buttons button:active {
+            transform: scale(0.98);
+        }
+        .mode-buttons button:disabled {
+            background-color: #aaa;
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        /* 回答エリア */
+        #answer {
+            text-align: left;
+            font-size: 1.1rem;
+            color: #333;
+            min-height: 100px;
+            background-color: #f9f9f9;
+            padding: 16px;
+            border-radius: 8px;
+            border: 1px solid #eee;
+        }
+        
+        /* 問題情報 (キー, スケール) */
+        #problem-info {
+            font-weight: 600;
+            color: #111;
+            margin-bottom: 12px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #eee;
+        }
+        #problem-info span {
+            display: inline-block;
+            background: #e0e7ff;
+            color: #4338ca;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            margin-right: 8px;
+        }
+        #problem-info span.problem-length {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        #replayButton {
+            padding: 8px 14px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            border: none;
+            border-radius: 8px;
+            background-color: #6c757d;
+            color: white;
+            transition: background-color 0.2s;
+            margin-top: 10px;
+        }
+        #replayButton:hover {
+            background-color: #5a6268;
+        }
+        #replayButton:disabled {
+            background-color: #aaa;
+            cursor: not-allowed;
+        }
+        
+        /* ユーザーの回答入力表示 */
+        #user-answer {
+            font-family: monospace;
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #888;
+            letter-spacing: 0.5em;
+            text-align: center;
+            margin: 20px 0;
+            min-height: 30px; 
+            word-break: break-all; 
+        }
+
+        /* 回答クリアボタン */
+        #control-buttons {
+            text-align: right;
+            margin: -10px 0 15px 0;
+        }
+        #clearButton {
+            padding: 6px 12px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            border: none;
+            border-radius: 8px;
+            background-color: #ffc107;
+            color: #333;
+            transition: background-color 0.2s;
+        }
+        #clearButton:hover {
+            background-color: #e0a800;
+        }
+        #clearButton:disabled {
+            background-color: #aaa;
+        }
+
+        /* --- ピアノ鍵盤UIスタイル --- */
+        #keyboard {
+            position: relative;
+            display: flex;
+            height: 180px; 
+            margin-bottom: 20px;
+        }
+
+        /* 白鍵 */
+        .key.white {
+            width: 14.2857%; 
+            height: 100%;
+            background-color: #fdfdfd;
+            border: 1px solid #ccc;
+            border-radius: 0 0 8px 8px;
+            box-sizing: border-box;
+            cursor: pointer;
+            transition: background-color 0.1s;
+            
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            padding-bottom: 10px;
+            font-weight: 600;
+            color: #555;
+            user-select: none;
+        }
+        .key.white:hover {
+            background-color: #eee;
+        }
+
+        /* 黒鍵 */
+        .key.black {
+            position: absolute;
+            width: 10%; 
+            height: 60%; 
+            background-color: #333;
+            border: 1px solid #555;
+            border-radius: 0 0 6px 6px;
+            box-sizing: border-box;
+            z-index: 10;
+            cursor: pointer;
+            transition: background-color 0.1s;
+
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            padding-bottom: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #eee;
+            user-select: none;
+        }
+        .key.black:hover {
+            background-color: #555;
+        }
+        
+        .key.black[data-key="1"]  { left: 10.78%; } 
+        .key.black[data-key="3"]  { left: 25.07%; } 
+        .key.black[data-key="6"]  { left: 53.65%; } 
+        .key.black[data-key="8"]  { left: 67.94%; } 
+        .key.black[data-key="10"] { left: 82.23%; } 
+        
+        .key:disabled {
+            background-color: #ddd; 
+            border-color: #bbb;
+            color: #aaa;
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+        .key.black:disabled {
+            background-color: #777; 
+            border-color: #666;
+            color: #aaa;
+        }
+
+        .key.scale-tone:not(:disabled):hover {
+            background-color: #cce5ff;
+        }
+        .key.black.scale-tone:not(:disabled):hover {
+            background-color: #0056b3;
+        }
+
+        .key.chord-tone {
+            font-weight: 900;
+        }
+        .key.white.chord-tone {
+            background-color: #fff0f0; 
+            color: #c53030;
+        }
+        .key.white.chord-tone.root {
+             background-color: #ffe0e0; 
+        }
+        .key.white.chord-tone:not(:disabled):hover {
+            background-color: #fdd;
+        }
+        .key.black.chord-tone {
+            background-color: #a51d1d; 
+            color: #fff;
+        }
+        .key.black.chord-tone.root {
+            background-color: #800000; 
+        }
+        .key.black.chord-tone:not(:disabled):hover {
+            background-color: #d00;
+        }
+
+
+        /* 最終結果表示 */
+        #final-result {
+            margin-top: 24px;
+            font-family: monospace;
+            font-size: 1.1rem;
+            line-height: 1.6;
+            white-space: normal; 
+        }
+        #final-result h4 {
+            margin: 10px 0 5px 0;
+            font-family: sans-serif;
+            font-size: 1rem;
+            color: #444;
+        }
+        #final-result div {
+            padding-left: 1em;
+        }
+        .correct {
+            color: #28a745; 
+        }
+        .incorrect {
+            color: #dc3545; 
+            font-weight: bold;
+        }
+        .incorrect-answer {
+            font-size: 0.9em;
+            color: #888;
+        }
+
+        /* v12 追加: 説明セクションのスタイル */
+        .explanation-container {
+            width: 100%;
+            max-width: 540px; /* メインコンテナと幅を合わせる */
+            margin-top: 20px;
+            box-sizing: border-box;
+        }
+        .explanation-container details {
+            background: #ffffff;
+            border-radius: 10px;
+            border: 1px solid #eee;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            overflow: hidden; /* 角丸を維持するため */
+        }
+        .explanation-container summary {
+            padding: 14px 20px;
+            font-weight: 600;
+            color: #444;
+            cursor: pointer;
+            list-style: none; /* デフォルトの三角を消す */
+            transition: background-color 0.2s;
+            position: relative; /* v12 修正: 矢印配置のため */
+        }
+        /* v12 修正: デフォルトのマーカーを消す (webkit) */
+        .explanation-container summary::-webkit-details-marker {
+            display: none;
+        }
+        /* v12 修正: カスタム矢印を追加 */
+        .explanation-container summary::before {
+            content: '▼';
+            position: absolute;
+            left: 20px;
+            top: 14px;
+            font-size: 0.8em;
+            color: #666;
+            transition: transform 0.2s ease;
+        }
+        .explanation-container details[open] summary::before {
+            transform: rotate(-180deg);
+        }
+        .explanation-container details[open] summary {
+            /* 開いているときはsummaryの角丸を調整（任意） */
+            border-bottom-left-radius: 0;
+            border-bottom-right-radius: 0;
+        }
+        
+        /* v12 修正: 矢印の分、テキストをインデント */
+        .explanation-container summary {
+            padding-left: 45px; 
+        }
+
+        .explanation-content {
+            padding: 0 20px 20px 20px;
+            font-size: 0.95rem;
+            line-height: 1.7;
+            color: #555;
+            border-top: 1px solid #eee;
+        }
+        .explanation-content p {
+            margin: 0;
+            padding-top: 15px;
+        }
+        .explanation-content p:first-child {
+            margin-top: 0;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- 音色選択UI -->
+        <div class="control-group">
+            <label for="waveformSelect">音色 (Waveform):</label>
+            <select id="waveformSelect">
+                <option value="sine" selected>Sine (サイン波)</option>
+                <option value="sawtooth">Sawtooth (のこぎり波)</option>
+                <option value="square">Square (矩形波)</option>
+                <option value="triangle">Triangle (三角波)</option>
+            </select>
+        </div>
+
+        <!-- v11 追加: 音量調整UI -->
+        <div class="control-group">
+            <label for="volumeControl">音量 (Volume):</label>
+            <input type="range" id="volumeControl" min="0" max="1" step="0.05" value="0.5">
+        </div>
+
+        <!-- モード別ボタン (v11 修正: テキスト変更) -->
+        <div class="mode-buttons">
+            <button id="easyModeButton">▶ 初級モード</button>
+            <button id="mediumModeButton">▶ 中級モード</button>
+        </div>
+        
+        <!-- 回答エリア -->
+        <div id="answer">（ボタンを押してください）</div>
+
+    </div> <!-- .container 閉じタグ -->
+
+    <!-- v12 追加: 説明セクション -->
+    <div class="explanation-container">
+        <details>
+            <summary>初級モードと中級モードの違い</summary>
+            <div class="explanation-content">
+                <p>
+                    <strong>初級モード:</strong><br>
+                    問題のメロディの<strong>1音目</strong>は、必ずそのキー（調）の<strong>ルート音（根音）</strong>から始まります。
+                    (例: キーがCなら、必ず「ド」の音から始まります)
+                </p>
+                <p>
+                    <strong>中級モード:</strong><br>
+                    問題のメロディの<strong>1音目</strong>は、そのキーの<strong>コードトーン</strong>（ルート音、第3音、第5音など）の中からランダムで選ばれます。
+                    (例: キーがCメジャーなら、「ド」「ミ」「ソ」のいずれかから始まります)
+                </p>
+                <p>
+                    1音目がルート音以外から始まるため、中級モードの方が難易度が高くなります。
+                </p>
+            </div>
+        </details>
+    </div>
+
+
+    <script>
+        // --- 1. Web Audio APIの準備 ---
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        
+        // v11 追加: マスターボリューム用のGainNode
+        const masterGainNode = audioContext.createGain();
+        masterGainNode.connect(audioContext.destination);
+        masterGainNode.gain.value = 0.5; // デフォルト音量を 0.5 に設定
+
+        /**
+         * 指定された周波数の音を再生する関数
+         * @param {number} frequency - 周波数 (Hz)
+         * @param {number} duration - 音の長さ (秒)
+         * @param {number} startTime - 再生開始時間 (AudioContextの時間)
+         * @param {string} type - 'sine', 'sawtooth', 'square', 'triangle'
+         */
+        function playNote(frequency, duration, startTime, type = 'sine') {
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            oscillator.connect(gainNode);
+            
+            // v11 修正: マスターボリュームに接続
+            gainNode.connect(masterGainNode); 
+            
+            // @ts-ignore
+            oscillator.type = type; 
+            oscillator.frequency.setValueAtTime(frequency, startTime);
+            
+            // エンベロープ (最大値 0.7 はそのまま)
+            gainNode.gain.setValueAtTime(0, startTime);
+            gainNode.gain.linearRampToValueAtTime(0.7, startTime + 0.02); 
+            gainNode.gain.linearRampToValueAtTime(0, startTime + duration - 0.05);
+
+            oscillator.start(startTime);
+            oscillator.stop(startTime + duration);
+        }
+
+        // --- 2. 音楽ロジック ---
+        // (midiToFreq, keyNames, extendedNoteNames, MODES, modeKeys, degreeNames, getDegreeName, 
+        //  getRandomElement, buildScaleFromMode, buildFinalNoteOptions, getWeightedRandomNote, createProblem は v10 から変更なし)
+
+        // MIDIノート番号を周波数に変換
+        function midiToFreq(midiNote) {
+            return 440 * Math.pow(2, (midiNote - 69) / 12);
+        }
+
+        // 12音の名前（黒鍵は'#'表記）
+        const keyNames = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+
+        // C2〜B6までの広い音名マップ（結果表示用）
+        const extendedNoteNames = {};
+        for (let i = 36; i <= 95; i++) { // C2=36, B6=95
+            extendedNoteNames[i] = keyNames[i % 12] + Math.floor(i / 12 - 1);
+        }
+
+        // スケール（モード）の定義
+        const MODES = {
+            'Ionian (メジャー)':         { intervals: [0, 2, 4, 5, 7, 9, 11], chord: [0, 4, 7] },
+            'Dorian (ドリアン)':       { intervals: [0, 2, 3, 5, 7, 9, 10], chord: [0, 3, 7] },
+            'Phrygian (フリジアン)':     { intervals: [0, 1, 3, 5, 7, 8, 10], chord: [0, 3, 7] },
+            'Lydian (リディアン)':       { intervals: [0, 2, 4, 6, 7, 9, 11], chord: [0, 4, 7] },
+            'Mixolydian (ミクソリディアン)': { intervals: [0, 2, 4, 5, 7, 9, 10], chord: [0, 4, 7] },
+            'Aeolian (マイナー)':      { intervals: [0, 2, 3, 5, 7, 8, 10], chord: [0, 3, 7] },
+            'Locrian (ロクリアン)':      { intervals: [0, 1, 3, 5, 6, 8, 10], chord: [0, 3, 6] },
+            'Harmonic Minor':       { intervals: [0, 2, 3, 5, 7, 8, 11], chord: [0, 3, 7] },
+            'Melodic Minor':        { intervals: [0, 2, 3, 5, 7, 9, 11], chord: [0, 3, 7] },
+            
+            /* v16 修正: 'Hmp5 Below' -> 'Phrygian Dominant' に名称変更。
+               同時に音程を Phrygian Dominant (R, m2, M3, P4, P5, m6, m7) に修正。
+               旧: 'Hmp5 Below': { intervals: [0, 2, 3, 6, 7, 9, 10], chord: [0, 4, 7] },
+            */
+            'Phrygian Dominant':  { intervals: [0, 1, 4, 5, 7, 8, 10], chord: [0, 4, 7] }, 
+
+            'Altered Scale':        { intervals: [0, 1, 3, 4, 6, 8, 10], chord: [0, 4, 6] },
+            'Diminished (W-H)':     { intervals: [0, 2, 3, 5, 6, 8, 9, 11], chord: [0, 3, 6, 9] }
+        };
+        const modeKeys = Object.keys(MODES);
+
+        // 度数名
+        const degreeNames = { 0: 'R', 1: 'm2', 2: 'M2', 3: 'm3', 4: 'M3', 5: 'P4', 6: 'd5', 7: 'P5', 8: 'm6', 9: 'M6', 10: 'm7', 11: 'M7' };
+        
+        function getDegreeName(interval) {
+            const sign = interval < 0 ? '-' : '';
+            const absInterval = Math.abs(interval);
+            const octave = Math.floor(absInterval / 12);
+            const degree = absInterval % 12;
+
+            const simpleDegree = degreeNames[degree];
+            if (octave === 0) return sign + simpleDegree;
+
+            let complexDegree = '';
+            switch(simpleDegree) {
+                case 'R':  complexDegree = 'R' + (octave * 7 + 1); break;
+                case 'm2': complexDegree = 'm' + (2 + octave * 7); break;
+                case 'M2': complexDegree = 'M' + (2 + octave * 7); break;
+                case 'm3': complexDegree = 'm' + (3 + octave * 7); break;
+                case 'M3': complexDegree = 'M' + (3 + octave * 7); break;
+                case 'P4': complexDegree = 'P' + (4 + octave * 7); break;
+                case 'd5': complexDegree = 'd' + (5 + octave * 7); break;
+                case 'P5': complexDegree = 'P' + (5 + octave * 7); break;
+                case 'm6': complexDegree = 'm' + (6 + octave * 7); break;
+                case 'M6': complexDegree = 'M' + (6 + octave * 7); break;
+                case 'm7': complexDegree = 'm' + (7 + octave * 7); break;
+                case 'M7': complexDegree = 'M' + (7 + octave * 7); break;
+                default: complexDegree = simpleDegree;
+            }
+            if (simpleDegree === 'R') complexDegree = 'P' + (octave * 7 + 1);
+            
+            return sign + complexDegree;
+        }
+
+        function getRandomElement(arr) {
+            return arr[Math.floor(Math.random() * arr.length)];
+        }
+
+        function buildScaleFromMode(modeIntervals, baseOctaves) {
+            const scale = [];
+            for (const base of baseOctaves) {
+                for (const interval of modeIntervals) {
+                    scale.push(base + interval);
+                }
+            }
+            return scale;
+        }
+        
+        function buildFinalNoteOptions(modeChord, baseOctaves) {
+            const options = [];
+            for (const base of baseOctaves) {
+                for (const interval of modeChord) {
+                    options.push(base + interval);
+                }
+            }
+            return options;
+        }
+
+        function getWeightedRandomNote(previousNote, scale, sigma = 5.0) {
+            const weights = [];
+            let totalWeight = 0;
+
+            for (const note of scale) {
+                const distance = Math.abs(note - previousNote);
+                const weight = Math.exp(-Math.pow(distance, 2) / (2 * Math.pow(sigma, 2)));
+                weights.push(weight);
+                totalWeight += weight;
+            }
+
+            let random = Math.random() * totalWeight;
+            for (let i = 0; i < scale.length; i++) {
+                if (random < weights[i]) {
+                    return scale[i];
+                }
+                random -= weights[i];
+            }
+            return getRandomElement(scale);
+        }
+
+        /**
+         * v10 修正: 指定された音数の問題（MIDIノート番号配列）を生成する
+         */
+        function createProblem(rootNote, scale, finalNotes, problemLength) {
+            const problemNotes = [];
+
+            // 1音目:
+            problemNotes.push(rootNote);
+
+            // 2音目 〜 (N-1)音目: スケールから重み付き
+            let lastNote = problemNotes[0];
+            for (let i = 0; i < problemLength - 2; i++) {
+                lastNote = getWeightedRandomNote(lastNote, scale);
+                problemNotes.push(lastNote);
+            }
+
+            // N音目 (最終音): 最終音候補(R,3,5)から重み付き
+            lastNote = problemNotes[problemNotes.length - 1]; 
+            problemNotes.push(getWeightedRandomNote(lastNote, finalNotes, 7.0));
+
+            return problemNotes;
+        }
+
+        // --- 3. ゲーム実行 ---
+
+        const easyModeButton = document.getElementById('easyModeButton');
+        const mediumModeButton = document.getElementById('mediumModeButton');
+        const answerDiv = document.getElementById('answer');
+        const waveformSelect = document.getElementById('waveformSelect');
+        // v11 追加: 音量スライダーの参照
+        const volumeControl = document.getElementById('volumeControl');
+        
+        let isPlaying = false; 
+        
+        // グローバルな状態
+        let currentProblem = []; 
+        let userAnswers = [];    
+        let currentProblemLength = 0; 
+        
+        let currentKeyInfo = {   
+            rootMidi: 60,
+            keyName: 'C',
+            scaleName: 'Ionian',
+            scaleIntervals: [0, 2, 4, 5, 7, 9, 11],
+            chordIntervals: [0, 4, 7]
+        };
+        
+        // v11 追加: 音量スライダーのイベントリスナー
+        volumeControl.addEventListener('input', (e) => {
+            // @ts-ignore
+            masterGainNode.gain.setValueAtTime(e.target.value, audioContext.currentTime);
+        });
+
+        /**
+         * 音のシーケンス（配列）を再生する関数
+         */
+        async function playSequence(notes) {
+            if (audioContext.state === 'suspended') {
+                await audioContext.resume();
+            }
+
+            if (isPlaying) return;
+            isPlaying = true;
+            easyModeButton.disabled = true;
+            mediumModeButton.disabled = true;
+            waveformSelect.disabled = true;
+            volumeControl.disabled = true; // v11 追加: 再生中は音量スライダーも無効化
+
+            const replayBtn = document.getElementById('replayButton');
+            if (replayBtn) replayBtn.disabled = true;
+            
+            const noteDuration = 0.5;
+            const pauseDuration = 0.2;
+            let currentTime = audioContext.currentTime + 0.1;
+            const selectedWaveform = waveformSelect.value;
+
+            for (const midiNote of notes) {
+                const freq = midiToFreq(midiNote);
+                playNote(freq, noteDuration, currentTime, selectedWaveform);
+                currentTime += (noteDuration + pauseDuration);
+            }
+
+            const totalDurationMs = (currentTime - audioContext.currentTime - pauseDuration + 0.1) * 1000;
+            
+            return new Promise(resolve => {
+                setTimeout(() => {
+                    isPlaying = false;
+                    easyModeButton.disabled = false;
+                    mediumModeButton.disabled = false;
+                    waveformSelect.disabled = false;
+                    volumeControl.disabled = false; // v11 追加: 音量スライダーを有効化
+                    
+                    if (replayBtn) replayBtn.disabled = false;
+                    
+                    if (userAnswers.length < currentProblemLength) {
+                         document.querySelectorAll('#keyboard .key.scale-tone').forEach(btn => {
+                             // @ts-ignore
+                             btn.disabled = false;
+                         });
+                    }
+                    
+                    resolve();
+                }, totalDurationMs);
+            });
+        }
+
+        /**
+         * 新しい問題を開始する
+         * @param {boolean} isMediumMode - 中級モードかどうか
+         */
+        async function startProblem(isMediumMode = false) {
+            if (isPlaying) return; 
+
+            // 1. UIを再生中状態にする
+            easyModeButton.disabled = true;
+            mediumModeButton.disabled = true;
+            waveformSelect.disabled = true;
+            volumeControl.disabled = true; // v11 追加
+            easyModeButton.textContent = '再生中...';
+            mediumModeButton.textContent = '再生中...';
+            answerDiv.innerHTML = '（問題を生成・再生しています）';
+
+            const problemLength = Math.floor(Math.random() * 6) + 3; // 3〜8音
+            currentProblemLength = problemLength; 
+
+            // 2. キーとスケールをランダムに決定
+            const randomRootMidi = 60 + Math.floor(Math.random() * 12);
+            const keyName = keyNames[randomRootMidi % 12];
+            const selectedModeName = getRandomElement(modeKeys);
+            const selectedMode = MODES[selectedModeName];
+            
+            const baseOctaves = [randomRootMidi - 12, randomRootMidi, randomRootMidi + 12];
+            
+            // 3. スケールを構築
+            const fullScale = buildScaleFromMode(selectedMode.intervals, baseOctaves);
+            const finalNotes = buildFinalNoteOptions(selectedMode.chord, baseOctaves);
+            
+            // 4. 1音目を決定
+            let firstNote;
+            if (isMediumMode) {
+                const firstNoteCandidates = selectedMode.chord.map(interval => randomRootMidi + interval);
+                firstNote = getRandomElement(firstNoteCandidates);
+            } else {
+                firstNote = randomRootMidi;
+            }
+
+            // 5. 問題を生成
+            const problem = createProblem(firstNote, fullScale, finalNotes, problemLength);
+            
+            // 6. グローバル状態を更新
+            currentProblem = problem;
+            userAnswers = [];
+            currentKeyInfo = {
+                rootMidi: randomRootMidi,
+                keyName: keyName,
+                scaleName: selectedModeName,
+                scaleIntervals: selectedMode.intervals,
+                chordIntervals: selectedMode.chord
+            };
+
+            // 7. 問題を再生
+            await playSequence(problem);
+            
+            // 8. クイズUIを構築
+            buildQuizUI();
+
+            // 9. ボタンテキストを元に戻す (v11 修正: テキスト変更)
+            easyModeButton.textContent = '▶ 初級モード';
+            mediumModeButton.textContent = '▶ 中級モード';
+        }
+        
+        // モードボタンにイベントリスナーを設定
+        easyModeButton.addEventListener('click', () => startProblem(false));
+        mediumModeButton.addEventListener('click', () => startProblem(true));
+
+
+        /**
+         * クイズUI（鍵盤、回答欄など）を構築する
+         */
+        function buildQuizUI() {
+            const { keyName, scaleName, scaleIntervals, chordIntervals } = currentKeyInfo;
+            
+            // v10 修正: 問題の音数を表示に追加
+            answerDiv.innerHTML = `
+                <div id="problem-info">
+                    <span>Key: ${keyName}</span>
+                    <span>Scale: ${scaleName}</span>
+                    <span class="problem-length">${currentProblemLength} 音</span>
+                    <button id="replayButton">聴きなおす</button>
+                </div>
+                
+                <div id="quiz-container">
+                    <!-- v10 修正: _ の数を currentProblemLength に合わせる -->
+                    <div id="user-answer">${'_ '.repeat(currentProblemLength).trim()}</div>
+                    <div id="control-buttons">
+                        <button id="clearButton">回答クリア</button>
+                    </div>
+                    <div id="keyboard"></div>
+                </div>
+
+                <div id="final-result" style="display: none;">
+                    <!-- 結果は showResults でここに移される -->
+                </div>
+            `;
+            
+            // 2. 聴きなおすボタンにイベントリスナーを追加
+            document.getElementById('replayButton').addEventListener('click', async () => {
+                await playSequence(currentProblem);
+            });
+
+            // 3. 回答クリアボタン
+            document.getElementById('clearButton').addEventListener('click', () => {
+                if (isPlaying || userAnswers.length === currentProblemLength) return; 
+                userAnswers = [];
+                document.getElementById('user-answer').textContent = '_ '.repeat(currentProblemLength).trim();
+            });
+
+            // 4. ピアノ鍵盤UIを構築
+            const keyboardDiv = document.getElementById('keyboard');
+            const keyTemplate = [
+                { type: 'white', semitone: 0, name: 'C' },
+                { type: 'black', semitone: 1, name: 'C#' },
+                { type: 'white', semitone: 2, name: 'D' },
+                { type: 'black', semitone: 3, name: 'D#' },
+                { type: 'white', semitone: 4, name: 'E' },
+                { type: 'white', semitone: 5, name: 'F' },
+                { type: 'black', semitone: 6, name: 'F#' },
+                { type: 'white', semitone: 7, name: 'G' },
+                { type: 'black', semitone: 8, name: 'G#' },
+                { type: 'white', semitone: 9, name: 'A' },
+                { type: 'black', semitone: 10, name: 'A#' },
+                { type: 'white', semitone: 11, name: 'B' }
+            ];
+
+            const keyRootSemitone = currentKeyInfo.rootMidi % 12; 
+            
+            // v15 修正: 'keyRootRoutine' -> 'keyRootSemitone' のタイポを修正
+            const scaleSemitones = scaleIntervals.map(i => (keyRootSemitone + i) % 12);
+            // v15 修正: 'keyRootRoutine' -> 'keyRootSemitone' のタイポを修正
+            const chordSemitones = chordIntervals.map(i => (keyRootSemitone + i) % 12);
+
+            for (const key of keyTemplate) {
+                const button = document.createElement('button');
+                button.className = `key ${key.type}`;
+                button.dataset.key = String(key.semitone);
+                button.textContent = keyNames[key.semitone]; 
+
+                if (scaleSemitones.includes(key.semitone)) {
+                    button.classList.add('scale-tone');
+                    button.dataset.semitone = String(key.semitone);
+                    button.addEventListener('click', onNoteButtonClick);
+                    
+                    if (chordSemitones.includes(key.semitone)) {
+                        button.classList.add('chord-tone');
+                        if (key.semitone === keyRootSemitone) {
+                            button.classList.add('root');
+                            button.textContent += ' (R)';
+                        }
+                    }
+                } else {
+                    button.disabled = true;
+                }
+                
+                keyboardDiv.appendChild(button);
+            }
+        }
+
+        /**
+         * 鍵盤ボタンがクリックされたときの処理
+         */
+        function onNoteButtonClick(event) {
+            if (isPlaying || userAnswers.length >= currentProblemLength) return;
+
+            // @ts-ignore
+            const semitone = parseInt(event.currentTarget.dataset.semitone, 10);
+            userAnswers.push(semitone);
+            
+            let answerDisplay = userAnswers.map(s => keyNames[s]).join(' ');
+            answerDisplay += ' _'.repeat(currentProblemLength - userAnswers.length);
+            document.getElementById('user-answer').textContent = answerDisplay;
+
+            if (userAnswers.length === currentProblemLength) {
+                showResults();
+            }
+        }
+        
+        /**
+         * v10 修正: 結果を表示する
+         */
+        function showResults() {
+            // 1. UIを切り替え
+            const quizContainer = document.getElementById('quiz-container');
+            const resultDiv = document.getElementById('final-result');
+            if (quizContainer) quizContainer.style.display = 'none';
+            if (resultDiv) resultDiv.style.display = 'block';
+
+            const replayBtn = document.getElementById('replayButton');
+            if (replayBtn) replayBtn.disabled = false;
+            
+            // 2. 正解データを作成
+            const correctAnswers = currentProblem.map(note => note % 12);
+            const correctMidi = currentProblem;
+            const rootMidi = currentKeyInfo.rootMidi; 
+
+            let correctHtml = '<h4>正解 (キー: ' + currentKeyInfo.keyName + ')</h4><div>';
+            for (let i = 0; i < currentProblemLength; i++) {
+                const note = correctMidi[i];
+                const noteName = extendedNoteNames[note] || (keyNames[note % 12] + '?');
+                const degree = getDegreeName(note - rootMidi);
+                correctHtml += `${i+1}. ${noteName} (${degree})<br>`;
+            }
+            correctHtml += '</div>';
+
+            // 3. ユーザーの回答と比較
+            let userHtml = '<h4>あなたの回答</h4><div>';
+            let allCorrect = true;
+            for (let i = 0; i < currentProblemLength; i++) {
+                const userSemitone = userAnswers[i];
+                const correctSemitone = correctAnswers[i];
+                const userName = keyNames[userSemitone];
+
+                if (userSemitone === correctSemitone) {
+                    userHtml += `<span class="correct">${i+1}. ${userName} (正解)</span><br>`;
+                } else {
+                    allCorrect = false;
+                    const correctName = keyNames[correctSemitone];
+                    userHtml += `<span class="incorrect">${i+1}. ${userName}</span>`;
+                    userHtml += ` <span class="incorrect-answer">(→ 正解は ${correctName})</span><br>`;
+                }
+            }
+            userHtml += '</div>';
+
+            // 4. 総合結果
+            if (allCorrect) {
+                userHtml = '<h4>あなたの回答</h4><div><span class="correct">全問正解！</span></div>' + userHtml;
+            }
+
+            if (resultDiv) resultDiv.innerHTML = correctHtml + userHtml;
+        }
+
+    </script>
+
+</body>
+</html>

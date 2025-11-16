@@ -17,6 +17,13 @@ let initialFireDuration = 0; // ビームの総持続時間
 function setup() {
   createCanvas(800, 600);
 
+  // 他のツールへのリンクを追加
+  let link = createA('https://pitch-training-game.vercel.app', '音感トレーニングツールへ戻る');
+  link.position(20, 20);
+  link.style('color', '#fff');
+  link.style('font-size', '16px');
+  link.style('text-decoration', 'none');
+
   // プレイヤーの初期化
   player = {
     x: 50,
