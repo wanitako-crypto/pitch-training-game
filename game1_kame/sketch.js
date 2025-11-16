@@ -13,6 +13,7 @@ const MAX_CHARGE = 800; // 最大チャージ時間 (例: 2倍に変更)
 const CHARGE_SPEED = 3; // ★チャージ速度。この数値を大きくすると速くなります。
 let fireDuration = 0; // ビームの持続時間
 let initialFireDuration = 0; // ビームの総持続時間
+let shotsRemaining = 3; // ★残り弾数
 
 function setup() {
   createCanvas(800, 600);
@@ -20,19 +21,20 @@ function setup() {
   // 他のツールへのリンクを追加
   // プレイヤーの初期化
   player = {
-    x: 50,
+    x: 20,
     y: height / 2,
     size: 30
   };
 
+  const horizontalOffset = 210; // この値を調整して全体の位置を右にずらします
   // 壁の初期化 (HPを大幅に増やす)
   walls = [
-    new Wall(width / 2 - 60, height / 2, 40, 220, 20000),
-    new Wall(width / 2, height / 2, 40, 220, 25000),
-    new Wall(width / 2 + 60, height / 2, 40, 220, 30000),
+    new Wall(width / 2 - 60 + horizontalOffset, height / 2, 40, 220, 15000),
+    new Wall(width / 2 + horizontalOffset, height / 2, 40, 220, 20000),
+    new Wall(width / 2 + 60 + horizontalOffset, height / 2, 40, 220, 35000),
   ];
 
-  treasure = new Treasure(width / 2 + 150, height / 2, 60, 1000);
+  treasure = new Treasure(width / 2 + 150 + horizontalOffset, height / 2, 60, 5000);
 }
 
 function draw() {
@@ -127,6 +129,13 @@ function runGame() {
   // ゲージ描画
   drawGauge();
 
+  // ★残り弾数を表示
+  textAlign(RIGHT, TOP);
+  textSize(24);
+  fill(255);
+  noStroke();
+  text(`残り弾数: ${shotsRemaining}`, width - 20, 20);
+
   // ゲームクリア・オーバーの判定
   checkGameState();
 }
@@ -150,6 +159,7 @@ function mouseReleased() {
     initialFireDuration = chargeTime; // 総持続時間を保存
     fireDuration = chargeTime; // 残り時間をセット
     chargeTime = 0;
+    shotsRemaining--; // ★弾数を1減らす
   }
 }
 
@@ -161,15 +171,19 @@ function checkGameState() {
     return; // ゲームオーバーが確定したら他の判定は不要
   }
 
-  // ゲームクリア判定：壁が壊れ、攻撃が完全に終了した時点で行う
-  // 1. 壁のHPが0以下
-  // 2. ビーム射出が終わっている
-  // 3. 画面上にパーティクルが残っていない
   const allWallsDestroyed = walls.every(w => w.hp <= 0);
-  if (allWallsDestroyed && gameState !== 'firing' && particles.length === 0) {
+  const isAttackFinished = gameState !== 'firing' && particles.length === 0;
+
+  // 攻撃が完全に終了した時点でのみ判定
+  if (isAttackFinished) {
     // この時点で宝物のHPが残っていればクリア
-    if (treasure.hp > 0) {
+    if (allWallsDestroyed && treasure.hp > 0) {
       gameState = 'gameClear';
+    } 
+    // ★弾切れによるゲームオーバー判定
+    // 壁が残っている状態で、残り弾数が0になったらゲームオーバー
+    else if (!allWallsDestroyed && shotsRemaining <= 0) {
+      gameState = 'gameOver';
     }
   }
 }
@@ -205,6 +219,7 @@ function restartGame() {
   }
   treasure.hp = treasure.initialHp;
   particles = [];
+  shotsRemaining = 3; // ★残り弾数をリセット
   gameState = 'playing';
 }
 
@@ -232,7 +247,7 @@ function drawEmitter() {
 function drawGauge() {
   const barWidth = 200;
   const barHeight = 15;
-  const x = player.x - barWidth / 2;
+  const x = player.x; // ゲージの開始位置をプレイヤーのX座標に合わせる
   const y = player.y + 30;
 
   if (gameState === 'charging') {
