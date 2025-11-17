@@ -19,9 +19,67 @@
         background-color: #111; /* 背景色を暗くする */
         overflow: hidden; /* スクロールバーを非表示に */
       }
+
+      /* ゲーム説明用のスタイル */
+      #description-container {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        z-index: 100; /* p5.jsキャンバスより手前に表示 */
+        background-color: rgba(0, 0, 0, 0.7);
+        color: white;
+        padding: 10px;
+        border-radius: 5px;
+        font-family: sans-serif;
+        max-width: 250px;
+      }
+      #description-toggle {
+        cursor: pointer;
+        font-weight: bold;
+        border: 1px solid white;
+        padding: 2px 8px;
+        border-radius: 3px;
+        display: inline-block;
+        user-select: none; /* テキスト選択を防ぐ */
+      }
+      #description-content {
+        margin-top: 10px;
+        display: none; /* 初期状態では非表示 */
+      }
+      #description-content.show {
+        display: block; /* 表示状態 */
+      }
     </style>
   </head>
   <body>
+    <!-- ゲーム説明 -->
+    <div id="description-container">
+      <span id="description-toggle">遊び方 [＋]</span>
+      <div id="description-content">
+        <p>マウスを長押ししてパワーを溜め、離すとビームを発射します。</p>
+        <p>壁をすべて破壊するとゲームクリアです。</p>
+        <p>壁の先にあるお宝を破壊してしまうとゲームオーバーになります。</p>
+      </div>
+    </div>
     <!-- p5.jsがここにゲーム画面(canvas)を自動的に作成します -->
+
+    <script>
+      // 説明の表示・非表示を切り替える機能
+      const toggle = document.getElementById('description-toggle');
+      const content = document.getElementById('description-content');
+      const container = document.getElementById('description-container');
+      let isOpen = false;
+
+      toggle.addEventListener('click', () => {
+        isOpen = !isOpen;
+        content.classList.toggle('show');
+        toggle.textContent = isOpen ? '遊び方 [－]' : '遊び方 [＋]';
+      });
+
+      // 説明欄でのクリックがゲームに影響しないようにする
+      container.addEventListener('mousedown', (event) => {
+        event.stopPropagation();
+      });
+    </script>
   </body>
 </html>

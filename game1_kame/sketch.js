@@ -26,15 +26,23 @@ function setup() {
     size: 30
   };
 
-  const horizontalOffset = 210; // この値を調整して全体の位置を右にずらします
-  // 壁の初期化 (HPを大幅に増やす)
-  walls = [
-    new Wall(width / 2 - 60 + horizontalOffset, height / 2, 40, 220, 15000),
-    new Wall(width / 2 + horizontalOffset, height / 2, 40, 220, 20000),
-    new Wall(width / 2 + 60 + horizontalOffset, height / 2, 40, 220, 35000),
-  ];
+  // 壁の生成
+  walls = []; // 配列を初期化
+  const numWalls = 10;
+  const startX = 250;
+  const wallSpacing = 45;
+  const initialHp = 5000;
+  const hpIncrement = 5000;
 
-  treasure = new Treasure(width / 2 + 150 + horizontalOffset, height / 2, 60, 5000);
+  for (let i = 0; i < numWalls; i++) {
+    const x = startX + i * wallSpacing;
+    const hp = initialHp + i * hpIncrement;
+    walls.push(new Wall(x, height / 2, 40, 220, hp));
+  }
+
+  // 最後の壁の後ろに宝物を配置
+  const lastWallX = walls[walls.length - 1].x;
+  treasure = new Treasure(lastWallX + 80, height / 2, 60, 5000);
 }
 
 function draw() {
@@ -135,6 +143,12 @@ function runGame() {
   fill(255);
   noStroke();
   text(`残り弾数: ${shotsRemaining}`, width - 20, 20);
+
+  // FPS表示
+  fill(255);
+  textSize(20);
+  textAlign(LEFT, TOP);
+  text(`FPS: ${floor(frameRate())}`, 10, 20);
 
   // ゲームクリア・オーバーの判定
   checkGameState();
@@ -351,7 +365,7 @@ class Target {
       if (this instanceof Wall) {
         particle.x = this.x - this.w / 2 - particle.size; // めり込み防止
         particle.vx = -particle.vx * random(0.2, 0.5);
-        particle.vy = (random() - 0.5) * 10;
+        particle.vy = (random() - 0.5) * 20;
       } else {
         // 宝物はパーティクルを消すだけ
         particle.life = 0;
