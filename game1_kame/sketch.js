@@ -28,11 +28,11 @@ function setup() {
 
   // 壁の生成
   walls = []; // 配列を初期化
-  const numWalls = 10;
-  const startX = 250;
-  const wallSpacing = 45;
+  const numWalls = 6;
+  const startX = 300;
+  const wallSpacing = 70;
   const initialHp = 5000;
-  const hpIncrement = 5000;
+  const hpIncrement = 7000;
 
   for (let i = 0; i < numWalls; i++) {
     const x = startX + i * wallSpacing;
@@ -42,7 +42,7 @@ function setup() {
 
   // 最後の壁の後ろに宝物を配置
   const lastWallX = walls[walls.length - 1].x;
-  treasure = new Treasure(lastWallX + 80, height / 2, 60, 5000);
+  treasure = new Treasure(lastWallX + 80, height / 2, 60, 2500);
 }
 
 function draw() {
