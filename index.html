@@ -3,65 +3,175 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Project: pitch-training-game</title>
+    <title>pitch-training-game</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --bg-color-1: #1a1a2e;
+            --bg-color-2: #16213e;
+            --accent-color: #0f3460;
+            --glow-color: rgba(83, 120, 149, 0.7);
+            --text-color: #e0e0e0;
+            --header-color: #ffffff;
+        }
+
+        @keyframes animated-gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        @keyframes card-entrance {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-            background-color: #f0f2f5;
-            color: #333;
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, var(--bg-color-1), var(--bg-color-2), var(--accent-color));
+            background-size: 200% 200%;
+            animation: animated-gradient 15s ease infinite;
+            color: var(--text-color);
+            margin: 0;
+            padding: 40px 20px;
             display: flex;
-            justify-content: center;
+            flex-direction: column;
             align-items: center;
             min-height: 100vh;
+            box-sizing: border-box;
+        }
+
+        .profile {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        .profile h1 {
+            font-size: 3rem;
+            font-weight: 600;
+            color: var(--header-color);
             margin: 0;
         }
+
         .container {
-            max-width: 600px;
-            background: #ffffff;
-            padding: 40px;
-            border-radius: 16px;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 900px;
+        }
+
+        h2 {
+            font-size: 1.1rem;
+            font-weight: 400;
+            color: var(--text-color);
+            border-bottom: 1px solid var(--accent-color);
+            padding-bottom: 10px;
+            margin-top: 50px;
+            margin-bottom: 30px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
+        }
+
+        .card {
+            background: rgba(22, 33, 62, 0.4);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            overflow: hidden;
+            text-decoration: none;
+            color: var(--text-color);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            
+            animation: card-entrance 0.7s ease-out forwards;
+            opacity: 0;
+            
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        /* Staggered animation delay */
+        .card:nth-child(1) { animation-delay: 0.1s; }
+        .card:nth-child(2) { animation-delay: 0.2s; }
+        .card:nth-child(3) { animation-delay: 0.3s; }
+        .card:nth-child(4) { animation-delay: 0.4s; }
+
+
+        .card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 0 25px var(--glow-color);
+        }
+
+        .card-content {
+            padding: 25px;
             text-align: center;
         }
-        h1 {
-            font-size: 2rem;
-            color: #1c1e21;
-            margin-bottom: 30px;
-        }
-        .link-list {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-        .link-list li {
-            margin-bottom: 15px;
-        }
-        .link-list a {
-            display: block;
-            padding: 15px 20px;
-            font-size: 1rem;
+
+        .card-title {
+            font-size: 1.2rem;
             font-weight: 600;
-            text-decoration: none;
-            color: #fff;
-            background-color: #007bff;
-            border-radius: 8px;
-            transition: background-color 0.2s ease, transform 0.1s ease;
+            margin: 0;
+            color: var(--header-color);
         }
-        .link-list a:hover {
-            background-color: #0056b3;
-        }
-        .link-list a:active {
-            transform: scale(0.98);
-        }
+
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Project: pitch-training-game</h1>
-        <ul class="link-list">
-            <li><a href="./ear-training.html">音感トレーニングツール</a></li>
-            <li><a href="./game1_kame/game1_kamehame.html">ビームゲーム</a></li>
-        </ul>
+
+    <div class="profile">
+        <h1>ryukaao</h1>
     </div>
+
+    <div class="container">
+        <h2>ツール</h2>
+        <div class="grid-container">
+            <a href="./ear-training.html" class="card">
+                <div class="card-content">
+                    <h3 class="card-title">音感トレーニングツール</h3>
+                </div>
+            </a>
+            <a href="./game1_kame/game1_kamehame.html" class="card">
+                <div class="card-content">
+                    <h3 class="card-title">ビームゲーム</h3>
+                </div>
+            </a>
+        </div>
+
+        <h2>リンク</h2>
+        <div class="grid-container">
+            <a href="https://x.com/ryuukaao" target="_blank" rel="noopener noreferrer" class="card">
+                <div class="card-content">
+                    <h3 class="card-title">X (Twitter)</h3>
+                </div>
+            </a>
+            <a href="https://www.youtube.com/@RyukaaoMusic-ud5wj" target="_blank" rel="noopener noreferrer" class="card">
+                <div class="card-content">
+                    <h3 class="card-title">YouTube</h3>
+                </div>
+            </a>
+            <a href="https://note.com/ryuukaao" target="_blank" rel="noopener noreferrer" class="card">
+                <div class="card-content">
+                    <h3 class="card-title">note</h3>
+                </div>
+            </a>
+            <a href="https://www.twitch.tv/ryukaaoo" target="_blank" rel="noopener noreferrer" class="card">
+                <div class="card-content">
+                    <h3 class="card-title">Twitch</h3>
+                </div>
+            </a>
+        </div>
+    </div>
+
 </body>
 </html>
