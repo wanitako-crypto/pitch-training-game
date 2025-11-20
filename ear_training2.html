@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interval Ear Training</title>
+    <style>
+        :root {
+            --primary-text: #ecf0f1;
+            --bg: #1a1d24;
+            --panel: #282c34;
+            --accent: #e67e22;
+            --accent-hover: #d35400;
+            --success: #2ecc71;
+            --error: #e74c3c;
+            --border: #444a59;
+            --light-gray: #95a5a6;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg);
+            color: var(--primary-text);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        h1 { 
+            font-size: 1.8rem; 
+            font-weight: 600;
+            margin-bottom: 15px; 
+            color: var(--accent);
+        }
+
+        /* レイアウトコンテナ */
+        .container {
+            background: var(--panel);
+            padding: 25px 30px;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            width: 100%;
+            max-width: 500px;
+            text-align: center;
+            border: 1px solid var(--border);
+        }
+
+        /* ステータスエリア */
+        .status-bar {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 25px;
+            font-weight: 600;
+            font-size: 1rem;
+            color: var(--light-gray);
+        }
+        .streak-box {
+            color: var(--accent);
+            background: rgba(230, 126, 34, 0.1);
+            padding: 5px 10px;
+            border-radius: 8px;
+        }
+
+        /* コントロールエリア */
+        .controls {
+            margin-bottom: 25px;
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        button {
+            padding: 12px 24px;
+            font-size: 1rem;
+            font-weight: 600;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-primary { 
+            background-color: var(--accent); 
+            color: white; 
+            box-shadow: 0 4px 15px -5px var(--accent);
+        }
+        .btn-primary:hover { 
+            background-color: var(--accent-hover); 
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px -5px var(--accent);
+        }
+        
+        .btn-secondary { 
+            background-color: var(--border); 
+            color: var(--primary-text); 
+        }
+        .btn-secondary:hover { 
+            background-color: #5a6175; 
+        }
+
+        /* 結果表示エリア */
+        #result-area {
+            min-height: 60px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 25px;
+            padding: 15px;
+            border-radius: 10px;
+            background: var(--bg);
+            border: 2px solid var(--border);
+            transition: all 0.3s;
+        }
+        #result-message { font-size: 1.4rem; font-weight: 700; }
+        #result-detail { font-size: 1rem; color: var(--light-gray); margin-top: 8px; }
+        
+        .correct { border-color: var(--success); }
+        .correct #result-message { color: var(--success); }
+        
+        .incorrect { border-color: var(--error); }
+        .incorrect #result-message { color: var(--error); }
+
+        /* 回答グリッド */
+        .answer-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
+            gap: 12px;
+            margin-bottom: 30px;
+        }
+
+        .interval-btn {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            padding: 15px 5px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--primary-text);
+        }
+        .interval-btn:hover:not(:disabled) {
+            background-color: var(--accent);
+            color: white;
+            border-color: var(--accent);
+            transform: translateY(-2px);
+        }
+        .interval-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* 設定エリア */
+        .settings {
+            border-top: 1px solid var(--border);
+            padding-top: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            align-items: center;
+        }
+        .setting-row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            font-size: 0.9rem;
+        }
+
+        /* あそびかた（アコーディオン） */
+        .accordion {
+            margin-top: 25px;
+            width: 100%;
+            max-width: 500px;
+        }
+        .accordion-header {
+            background: none;
+            border: none;
+            color: var(--light-gray);
+            font-size: 0.9rem;
+            cursor: pointer;
+            width: 100%;
+            text-align: center;
+            padding: 10px;
+        }
+        .accordion-content {
+            display: none;
+            font-size: 0.9rem;
+            color: var(--primary-text);
+            background: var(--panel);
+            padding: 20px;
+            border-radius: 8px;
+            line-height: 1.7;
+            text-align: left;
+            border: 1px solid var(--border);
+        }
+        .show { display: block; }
+
+    </style>
+</head>
+<body>
+
+    <h1>Interval Ear Training</h1>
+
+    <div class="container">
+        <div class="status-bar">
+            <span class="streak-box">Streak: <span id="streak-count">0</span></span>
+        </div>
+
+        <div class="controls">
+            <button id="btn-start" class="btn-primary">START</button>
+            <button id="btn-replay" class="btn-secondary" disabled>Replay</button>
+        </div>
+
+        <div id="result-area">
+            <div id="result-message">Press START</div>
+            <div id="result-detail"></div>
+        </div>
+
+        <div class="answer-grid" id="answer-grid">
+            </div>
+
+        <div class="settings">
+            <div class="setting-row">
+                <label for="waveform">Waveform:</label>
+                <select id="waveform">
+                    <option value="sine">Sine</option>
+                    <option value="triangle" selected>Triangle</option>
+                    <option value="sawtooth">Sawtooth</option>
+                    <option value="square">Square</option>
+                </select>
+            </div>
+            <div class="setting-row">
+                <label for="volume">Volume:</label>
+                <input type="range" id="volume" min="0" max="1" step="0.1" value="0.5">
+            </div>
+        </div>
+    </div>
+
+    <div class="accordion">
+        <button id="accordion-toggle" class="accordion-header">▼ あそびかた / How to play</button>
+        <div id="accordion-content" class="accordion-content">
+            <p><strong>1. スタート:</strong> 「START」ボタンを押すとゲームが始まります。</p>
+            <p><strong>2. 聴く:</strong> 2つの音が順番に再生されます。</p>
+            <p><strong>3. 答える:</strong> 下のボタンから、2音間の音程（インターバル）を選んでください。</p>
+            <p><strong>4. 次へ:</strong> 正解・不正解が表示されたら、「NEXT」ボタン（STARTボタンが変化）を押して次の問題へ進みます。</p>
+            <ul>
+                <li><strong>m</strong>: マイナー (短)</li>
+                <li><strong>M</strong>: メジャー (長)</li>
+                <li><strong>P</strong>: パーフェクト (完全)</li>
+                <li><strong>Tri</strong>: トライトーン (増4度/減5度)</li>
+            </ul>
+        </div>
+    </div>
+
+<script>
+/**
+ * Logic: 音楽理論と計算ロジック
+ */
+class GameLogic {
+    constructor() {
+        this.streak = 0;
+        this.currentInterval = null; // 半音数 (1-12)
+        this.note1 = null; // MIDI Note Number
+        this.note2 = null; // MIDI Note Number
+        this.baseOctave = 4; // C4 (Center C)
+        
+        // MIDI番号と音名のマッピング
+        this.noteNames = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
+        
+        // ボタン定義と半音数のマッピング
+        this.intervals = [
+            { label: "m2", semitones: 1, name: "Minor 2nd" },
+            { label: "M2", semitones: 2, name: "Major 2nd" },
+            { label: "m3", semitones: 3, name: "Minor 3rd" },
+            { label: "M3", semitones: 4, name: "Major 3rd" },
+            { label: "P4", semitones: 5, name: "Perfect 4th" },
+            { label: "Tri", semitones: 6, name: "Tritone" },
+            { label: "P5", semitones: 7, name: "Perfect 5th" },
+            { label: "m6", semitones: 8, name: "Minor 6th" },
+            { label: "M6", semitones: 9, name: "Major 6th" },
+            { label: "m7", semitones: 10, name: "Minor 7th" },
+            { label: "M7", semitones: 11, name: "Major 7th" },
+            { label: "P8", semitones: 12, name: "Perfect 8th" }
+        ];
+    }
+
+    // 新しい問題を作成
+    generateQuestion() {
+        const minNote = 48; // C3
+        const maxNote = 72; // C5 (この範囲で note1 を決める)
+        const overallMin = 48; // C3 (再生可能な最低音)
+        const overallMax = 84; // C6 (再生可能な最高音)
+
+        let note1, note2, interval;
+
+        // 有効な音域の問題が生成されるまでループ
+        while (true) {
+            // 基準音 (Note 1) をランダムに決定
+            note1 = Math.floor(Math.random() * (maxNote - minNote + 1)) + minNote;
+            
+            // 音程 (Interval) をランダムに決定 (1-12)
+            interval = Math.floor(Math.random() * 12) + 1;
+
+            // 50%の確率で上行か下行かを決定
+            const isAscending = Math.random() < 0.5;
+
+            if (isAscending) {
+                note2 = note1 + interval;
+                // 音域チェック
+                if (note2 <= overallMax) {
+                    break; // 有効な問題なのでループを抜ける
+                }
+            } else { // 下行の場合
+                note2 = note1 - interval;
+                // 音域チェック
+                if (note2 >= overallMin) {
+                    break; // 有効な問題なのでループを抜ける
+                }
+            }
+        }
+
+        this.note1 = note1;
+        this.note2 = note2;
+        this.currentInterval = interval; // 回答チェック用 (常に正の値)
+    }
+
+    checkAnswer(semitones) {
+        const isCorrect = (semitones === this.currentInterval);
+        if (isCorrect) {
+            this.streak++;
+        } else {
+            this.streak = 0;
+        }
+        return {
+            isCorrect: isCorrect,
+            correctInterval: this.intervals.find(i => i.semitones === this.currentInterval),
+            note1Name: this.getNoteName(this.note1),
+            note2Name: this.getNoteName(this.note2)
+        };
+    }
+
+    getNoteName(midiNumber) {
+        const index = midiNumber % 12;
+        return this.noteNames[index];
+    }
+
+    getFrequency(midiNumber) {
+        return 440 * Math.pow(2, (midiNumber - 69) / 12);
+    }
+}
+
+/**
+ * Audio: Web Audio API 周り
+ */
+class AudioEngine {
+    constructor() {
+        this.ctx = null;
+        this.waveform = 'triangle';
+        this.masterVolume = 0.5;
+    }
+
+    init() {
+        if (!this.ctx) {
+            this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (this.ctx.state === 'suspended') {
+            this.ctx.resume();
+        }
+    }
+
+    setWaveform(type) {
+        this.waveform = type;
+    }
+
+    setVolume(val) {
+        this.masterVolume = val;
+    }
+
+    // 音を鳴らす (ADSRエンベロープ付き)
+    playTone(freq, startTime, duration) {
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+
+        osc.type = this.waveform;
+        osc.frequency.value = freq;
+
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+
+        const attack = 0.02;
+        const release = 0.1;
+        const volume = this.masterVolume;
+
+        // エンベロープ処理 (クリッピングノイズ防止)
+        gain.gain.setValueAtTime(0, startTime);
+        gain.gain.linearRampToValueAtTime(volume, startTime + attack);
+        gain.gain.setValueAtTime(volume, startTime + duration - release);
+        gain.gain.linearRampToValueAtTime(0, startTime + duration);
+
+        osc.start(startTime);
+        osc.stop(startTime + duration);
+    }
+
+    playSequence(freq1, freq2) {
+        this.init();
+        const now = this.ctx.currentTime;
+        const noteDuration = 0.6;
+        const gap = 0.1;
+
+        // 1音目
+        this.playTone(freq1, now, noteDuration);
+        // 2音目
+        this.playTone(freq2, now + noteDuration + gap, noteDuration);
+    }
+}
+
+/**
+ * UI: 画面操作とイベントリスナー
+ */
+class UIController {
+    constructor(gameLogic, audioEngine) {
+        this.game = gameLogic;
+        this.audio = audioEngine;
+        this.state = 'IDLE'; // IDLE, PLAYING, ANSWERED
+
+        // DOM Elements
+        this.btnStart = document.getElementById('btn-start');
+        this.btnReplay = document.getElementById('btn-replay');
+        this.streakDisplay = document.getElementById('streak-count');
+        this.resultArea = document.getElementById('result-area');
+        this.resultMsg = document.getElementById('result-message');
+        this.resultDetail = document.getElementById('result-detail');
+        this.grid = document.getElementById('answer-grid');
+        
+        this.accordionToggle = document.getElementById('accordion-toggle');
+        this.accordionContent = document.getElementById('accordion-content');
+
+        this.init();
+    }
+
+    init() {
+        // グリッドボタン生成
+        this.game.intervals.forEach(interval => {
+            const btn = document.createElement('button');
+            btn.className = 'interval-btn';
+            btn.innerText = interval.label;
+            btn.dataset.semitones = interval.semitones;
+            btn.onclick = () => this.handleAnswer(parseInt(interval.semitones));
+            btn.disabled = true;
+            this.grid.appendChild(btn);
+        });
+
+        // イベントリスナー
+        this.btnStart.onclick = () => this.handleStartNext();
+        this.btnReplay.onclick = () => this.handleReplay();
+        
+        // 設定変更
+        document.getElementById('waveform').onchange = (e) => this.audio.setWaveform(e.target.value);
+        document.getElementById('volume').oninput = (e) => this.audio.setVolume(parseFloat(e.target.value));
+
+        // アコーディオン
+        this.accordionToggle.onclick = () => {
+            this.accordionContent.classList.toggle('show');
+        };
+    }
+
+    handleStartNext() {
+        if (this.state === 'IDLE' || this.state === 'ANSWERED') {
+            // NEXT / START処理
+            this.game.generateQuestion();
+            this.playCurrentQuestion();
+            
+            // UI更新
+            this.state = 'PLAYING';
+            this.btnStart.innerText = 'NEXT';
+            this.btnStart.disabled = true; // 回答するまで次は押せないようにする（あるいはReplay代わりにするかだが、仕様通り無効化推奨）
+            this.btnReplay.disabled = false;
+            
+            this.resetFeedback();
+            this.enableGrid(true);
+        }
+    }
+
+    handleReplay() {
+        this.playCurrentQuestion();
+    }
+
+    playCurrentQuestion() {
+        const f1 = this.game.getFrequency(this.game.note1);
+        const f2 = this.game.getFrequency(this.game.note2);
+        this.audio.playSequence(f1, f2);
+    }
+
+    handleAnswer(semitones) {
+        if (this.state !== 'PLAYING') return;
+
+        const result = this.game.checkAnswer(semitones);
+        
+        // 結果表示
+        this.showFeedback(result);
+        
+        // Streak更新
+        this.streakDisplay.innerText = this.game.streak;
+
+        // 状態更新
+        this.state = 'ANSWERED';
+        this.enableGrid(false);
+        this.btnStart.disabled = false; // NEXTボタン有効化
+    }
+
+    enableGrid(enabled) {
+        const btns = document.querySelectorAll('.interval-btn');
+        btns.forEach(b => b.disabled = !enabled);
+    }
+
+    showFeedback(result) {
+        this.resultArea.className = result.isCorrect ? 'correct' : 'incorrect';
+        this.resultMsg.innerText = result.isCorrect ? "Correct!" : "Wrong!";
+        
+        // 詳細表示: Note Names and Interval
+        // ex: C -> F# (Tritone)
+        this.resultDetail.innerText = `${result.note1Name} → ${result.note2Name} : ${result.correctInterval.label} (${result.correctInterval.name})`;
+    }
+
+    resetFeedback() {
+        this.resultArea.className = '';
+        this.resultMsg.innerText = 'Listen...';
+        this.resultDetail.innerText = '';
+    }
+}
+
+// アプリ起動
+const logic = new GameLogic();
+const audio = new AudioEngine();
+const app = new UIController(logic, audio);
+
+</script>
+</body>
+</html>
