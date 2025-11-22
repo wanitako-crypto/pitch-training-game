@@ -493,6 +493,11 @@ function mousePressed() {
   return false;
 }
 
+function touchStarted() {
+  generateArt();
+  return false;
+}
+
 function windowResized() {
   resizeCanvas(windowWidth, windowHeight);
   renderBuffer = createGraphics(width, height);
