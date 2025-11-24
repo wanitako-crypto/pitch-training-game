@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>Slowed + Reverb Player</title>
+<style>
+  body { background-image: url('bg.png'); background-size: cover; background-repeat: no-repeat; background-position: center; color: #fff; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; }
+  #drop-zone { width: 300px; height: 100px; border: 2px dashed #666; display: flex; align-items: center; justify-content: center; border-radius: 10px; transition: 0.3s; margin-bottom: 20px; }
+  #drop-zone.hover { border-color: #fff; background: #333; }
+  .controls-container { display: flex; gap: 40px; align-items: center; flex-wrap: wrap; justify-content: center; }
+  .control-wrapper { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+  .control-wrapper label { display: flex; align-items: center; gap: 10px; }
+  .control-wrapper input[type="range"] { width: 150px; } /* Reverted to horizontal */
+  .seek-wrapper { width: 100%; max-width: 500px; margin-top: 20px; text-align: center; }
+  #stopBtn { margin-top: 20px; }
+  .app-container {
+    background: rgba(0, 0, 0, 0.7);
+    padding: 30px;
+    border-radius: 15px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+</style>
+</head>
+<body>
+  <!-- 全てのUI要素を囲むメインコンテナ -->
+  <div class="app-container">
+
+    <!-- MP3ファイルをドラッグ&ドロップするためのエリア -->
+    <div id="drop-zone">MP3ファイルをここにドロップ</div>
+
+    <!-- すべてのコントロールスライダーをまとめるコンテナ -->
+    <div class="controls-container">
+
+      <!-- 個別のコントロール（ラベルとスライダー）を囲むラッパー -->
+      <div class="control-wrapper">
+        <label>Speed/Pitch: <span id="rateValue">0.85</span></label>
+        <input type="range" id="rate" min="0.5" max="1.0" step="0.01" value="0.85">
+      </div>
+      
+      <div class="control-wrapper">
+        <label>Reverb: <span id="reverbValue">0.50</span></label>
+        <input type="range" id="reverbAmt" min="0" max="1.0" step="0.01" value="0.5">
+      </div>
+      
+      <div class="control-wrapper">
+        <label>Rv Duration: <span id="durationValue">2.0</span>s</label>
+        <input type="range" id="reverbDuration" min="0.1" max="5.0" step="0.1" value="2.0">
+      </div>
+      
+      <div class="control-wrapper">
+        <label>Rv Decay: <span id="decayValue">2.0</span></label>
+        <input type="range" id="reverbDecay" min="0.1" max="5.0" step="0.1" value="2.0">
+      </div>
+      
+      <div class="control-wrapper">
+        <label>Volume: <span id="volumeValue">1.0</span></label>
+        <input type="range" id="volume" min="0" max="1.5" step="0.01" value="1.0">
+      </div>
+      
+      <!-- ローパスフィルターの周波数コントロール -->
+      <div class="control-wrapper">
+        <label>Low-pass: <span id="lowpassValue">20000</span> Hz</label>
+        <input type="range" id="lowpassFreq" min="0" max="1000" value="1000">
+      </div>
+      
+      <!-- ローパスフィルターのQ値（レゾナンス）コントロール -->
+      <div class="control-wrapper">
+          <label>LP Q: <span id="lowpassQValue">1.0</span></label>
+          <input type="range" id="lowpassQ" min="0.0001" max="20.0" step="0.1" value="1">
+      </div>
+      
+      <!-- ハイパスフィルターの周波数コントロール -->
+      <div class="control-wrapper">
+        <label>High-pass: <span id="highpassValue">20</span> Hz</label>
+        <input type="range" id="highpassFreq" min="0" max="1000" value="0">
+      </div>
+
+      <!-- ハイパスフィルターのQ値（レゾナンス）コントロール -->
+      <div class="control-wrapper">
+          <label>HP Q: <span id="highpassQValue">1.0</span></label>
+          <input type="range" id="highpassQ" min="0.0001" max="20.0" step="0.1" value="1">
+      </div>
+    </div>
+
+    <!-- 再生位置を示すシークバー -->
+    <div class="seek-wrapper">
+      <label>Playback Position</label>
+      <input type="range" id="playbackSeek" min="0" max="1" step="0.001" value="0" style="width: 100%;">
+    </div>
+
+    <!-- 停止ボタン -->
+    <button id="stopBtn">STOP</button>
+  </div>
+
+  <!-- JavaScriptファイルを読み込み。'defer'属性により、HTMLの解析完了後にスクリプトが実行される -->
+  <script src="app.js" defer></script>
+</body>
+</html>
