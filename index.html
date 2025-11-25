@@ -13,8 +13,8 @@
             --bg-color-2: #16213e;
             --accent-color: #0f3460;
             --glow-color: rgba(83, 120, 149, 0.7);
-            --text-color: #e0e0e0;
-            --header-color: #ffffff;
+            --text-color: #000000;
+            --header-color: #000000;
         }
 
         @keyframes animated-gradient {
@@ -36,9 +36,9 @@
 
         body {
             font-family: 'Poppins', sans-serif;
-            background: linear-gradient(135deg, var(--bg-color-1), var(--bg-color-2), var(--accent-color));
-            background-size: 200% 200%;
-            animation: animated-gradient 15s ease infinite;
+            background: url(./bgindex.png);
+            background-size: cover;
+            background-attachment: fixed;
             color: var(--text-color);
             margin: 0;
             padding: 40px 20px;
@@ -85,7 +85,7 @@
         }
 
         .card {
-            background: rgba(22, 33, 62, 0.4);
+            background: rgba(121, 219, 219, 0.3);
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.1);
